@@ -168,7 +168,7 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
         texts.append('then Stops All Stations to {}'.format(destination))
 
     joined = ', '.join(texts)
-    if via_city_loop and not is_up:
+    if via_city_loop and not is_up and from_stop == 'Flinders Street':
         joined += ' via the City Loop'
 
     stoppingType = ''
