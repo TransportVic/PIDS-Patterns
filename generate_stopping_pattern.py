@@ -1,6 +1,8 @@
 import json
+import os
 
-lines = json.load(open('lines.json', 'r'))
+__dirname = os.path.dirname(os.path.realpath(__file__))
+lines = json.load(open(__dirname + '/lines.json', 'r'))
 
 northern_group = [
 'Craigieburn',

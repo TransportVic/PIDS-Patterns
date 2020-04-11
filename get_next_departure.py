@@ -5,13 +5,15 @@ import time
 import sys
 import json
 from generate_stopping_pattern import generate_stopping_pattern
+import os
 
-config = json.load(open('config.json', 'r'))
+__dirname = os.path.dirname(os.path.realpath(__file__))
+config = json.load(open(__dirname + '/config.json', 'r'))
+stations = json.load(open(__dirname + '/stations.json', 'r'))
 
 key = config['key']
 dev_id = config['dev_id']
 
-stations = json.load(open('stations.json', 'r'))
 
 aus_mel = gettz('Australia/Melbourne')
 utc = gettz('Australia/Melbourne')
