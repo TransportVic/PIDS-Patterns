@@ -77,6 +77,9 @@ def get_next_departure_for_platform(station_name, platform):
     stopGTFSID = stations[station_name]
     url = '/v3/departures/route_type/0/stop/{}?gtfs=true&max_results=5&expand=run&expand=route'.format(stopGTFSID)
     departures_payload = ptv_api(url, dev_id, key)
+    if 'departures' not in departures_payload:
+        print(departures_payload)
+        raise Exception(departures_payload)
     departures = departures_payload['departures']
     runs = departures_payload['runs']
     routes = departures_payload['routes']
