@@ -167,6 +167,10 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     if relevant_stops[relevant_stops.index(last_stop) + 1] != destination:
         texts.append('then Stops All Stations to {}'.format(destination))
 
+    joined = ', '.join(texts)
+    if via_city_loop and not is_up:
+        joined += ' via the City Loop'
+
     stoppingType = ''
 
     if express_count == 0:
@@ -177,6 +181,6 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
         stoppingType = 'Express Service'
 
     return {
-        "stopping_pattern": ', '.join(texts),
+        "stopping_pattern": joined,
         "stopping_type": stoppingType
     }

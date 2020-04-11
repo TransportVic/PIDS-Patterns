@@ -32,7 +32,11 @@ def format_time(time):
     hour_offset = int(iso_time[-5:-3])
     hour += hour_offset
     hour %= 12
-    return '{}:{}'.format(str(hour), str(minute))
+    if minute < 10:
+        minute = '0' + str(minute)
+    else:
+        minute = str(minute)
+    return '{}:{}'.format(str(hour), minute)
 
 def time_diff(iso):
     millis_now = int(round(time.time()))
@@ -129,7 +133,7 @@ def get_next_departure_for_platform(station_name, platform):
     elif len(rrb_departures):
         raise Exception('NO TRAINS OPERATING_REPLACEMENT BUSES|H1^_HAVE BEEN ARRANGED')
     else:
-        raise Exception('NO TRAINS DEPART|FROM THIS PLATFORM')
+        raise Exception('NO TRAINS DEPART_FROM THIS PLATFORM')
 
 def generate_pids_string(station_name, platform):
     next_departure = None
@@ -161,24 +165,31 @@ def generate_pids_string(station_name, platform):
 
     scheduled_departure = format_time(scheduled_departure_utc)
     pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type)
-    if stopping_type != 'Stopping All Stations':
+    if stopping_type != 'Stops All Stations':
         pids_string += '|H1^_{}'.format(stopping_pattern)
     return pids_string
 
-pid = PID.for_device(sys.argv[3])
-last_string = None
-while True:
-    pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
-    if last_string != pids_string:
-        try:
-            pid.send(pids_string)
-        except Exception as e:
-            pass
-        last_string = pids_string
-    else:
-        print('Nothing to do, skipping')
-    time.sleep(30)
+def pid_send(pid, data):
+    try:
+        pid.send(data)
+    except Exception as e:
+        pass
+
+def pid_ping(pid):
     try:
         pid.ping()
     except Exception as e:
         pass
+
+# pid = PID.for_device(sys.argv[3])
+last_string = None
+while True:
+    pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
+    if last_string != pids_string:
+        # pid_send(pid, pids_string)
+        print(pids_string)
+        last_string = pids_string
+    else:
+        print('Nothing to do, skipping')
+    time.sleep(30)
+    # pid_ping(pid)
