@@ -152,9 +152,9 @@ def generate_pids_string(station_name, platform):
     if estimated_departure_utc:
         time_to_departure = time_diff(estimated_departure_utc)
         if time_to_departure <= 0:
-            time_to_departure = 'NOW '
+            time_to_departure = 'NOW'
         else:
-            time_to_departure = str(time_to_departure) + ' '
+            time_to_departure = str(time_to_departure) + ''
 
     destination = destination.upper()
     if destination == 'FLINDERS STREET':
@@ -176,30 +176,35 @@ def generate_pids_string(station_name, platform):
         pids_string += '|H1^_{}'.format(stopping_pattern)
     return pids_string
 
-def pid_send(pid, data):
+pid = None
+
+def pid_send(data):
     try:
-        pid.send(data)
+        if pid != None:
+            pid.send(data)
     except Exception as e:
         print(e)
         pass
 
-def pid_ping(pid):
+def pid_ping():
     try:
-        pid.ping()
+        if pid != None:
+            pid.ping()
     except Exception as e:
         print(e)
         pass
 
-with PID.for_device(sys.argv[3]) as pid:
-# if True:
-    last_string = None
-    while True:
-        pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
-        if last_string != pids_string:
-            pid_send(pid, pids_string)
-            print(pids_string)
-            last_string = pids_string
-        else:
-            print('Nothing to do, skipping')
-        time.sleep(30)
-        pid_ping(pid)
+if len(sys.argv) == 4:
+    pid = PID.for_device(sys.argv[3])
+
+last_string = None
+while True:
+    pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
+    if last_string != pids_string:
+        pid_send(pids_string)
+        print(pids_string)
+        last_string = pids_string
+    else:
+        print('Nothing to do, skipping')
+    time.sleep(30)
+    pid_ping()
