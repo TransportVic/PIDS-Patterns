@@ -170,10 +170,9 @@ def generate_pids_string(station_name, platform):
     if is_all_except:
         bottom_row = stopping_pattern
 
-    pids_string = 'N20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
+    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
     if stopping_type != 'Stops All Stations' and not is_all_except:
-        pids_string += '|N1^{}_{}'.format(pids_string[4:], stopping_pattern)
-        # pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
+        pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
     return pids_string
 
 def pid_send(pid, data):
