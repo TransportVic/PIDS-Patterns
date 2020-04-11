@@ -151,8 +151,16 @@ def generate_pids_string(station_name, platform):
         else:
             time_to_departure = str(time_to_departure)
 
+    destination = destination.upper()
+    if destination == 'FLINDERS STREET':
+        destination = 'FLINDERS ST'
+    if destination == 'SOUTHERN CROSS':
+        destination = 'STHN CROSS'
+    if destination == 'UPPER FERNTREE GULLY':
+        destination = 'UPPER F.T.G'
+
     scheduled_departure = format_time(scheduled_departure_utc)
-    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination.upper(), time_to_departure, stopping_type)
+    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type)
     if stopping_type != 'Stopping All Stations':
         pids_string += '|H1^_{}'.format(stopping_pattern)
     return pids_string
