@@ -7,6 +7,8 @@ import json
 from generate_stopping_pattern import generate_stopping_pattern
 import os
 
+from metlinkpid import PID
+
 __dirname = os.path.dirname(os.path.realpath(__file__))
 config = json.load(open(__dirname + '/config.json', 'r'))
 stations = json.load(open(__dirname + '/stations.json', 'r'))
@@ -147,4 +149,10 @@ if estimated_departure_utc:
 scheduled_departure = format_time(scheduled_departure_utc)
 pids_string = 'V20^{} {}~{}_{}|H10^_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type, stopping_pattern)
 
-print(pids_string)
+if sys.argv[3]:
+    print('Attempting to send to PID on', sys.argv[3])
+    pid = PID.for_device(sys.argv[3])
+    pid.send(pids_string)
+    while True:
+        time.sleep(10)
+        pids.ping()
