@@ -150,7 +150,7 @@ def generate_pids_string(station_name, platform):
     scheduled_departure = format_time(scheduled_departure_utc)
     pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination.upper(), time_to_departure, stopping_type)
     if stopping_type != 'Stopping All Stations':
-        pids_string += '|H10^_{}'.format(stopping_pattern)
+        pids_string += '|H1^_{}'.format(stopping_pattern)
     return pids_string
 
 pid = PID.for_device(sys.argv[3])
@@ -160,8 +160,8 @@ while True:
     if last_string != pids_string:
         try:
             pid.send(pids_string)
-        except e:
-            print(e)
+        except Exception as e:
+            pass
         last_string = pids_string
     time.sleep(30)
     pids.ping()
