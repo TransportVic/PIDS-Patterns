@@ -190,16 +190,16 @@ def pid_ping(pid):
         print(e)
         pass
 
-# with PID.for_device(sys.argv[3]) as pid:
+with PID.for_device(sys.argv[3]) as pid:
 if True:
     last_string = None
     while True:
         pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
         if last_string != pids_string:
-            # pid_send(pid, pids_string)
+            pid_send(pid, pids_string)
             print(pids_string)
             last_string = pids_string
         else:
             print('Nothing to do, skipping')
         time.sleep(30)
-        # pid_ping(pid)
+        pid_ping(pid)
