@@ -172,7 +172,7 @@ def generate_pids_string(station_name, platform):
         bottom_row = stopping_pattern
 
     pids_string = 'V20^{} {}{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
-    if stopping_type != 'Stops All Stations' and not is_all_except:
+    if stopping_pattern != 'Stops All Stations' and not is_all_except:
         pids_string += '|H0^_{}'.format(stopping_pattern)
     return pids_string
 
@@ -195,19 +195,26 @@ def pid_ping():
         print(e)
         pass
 
+def send_blank():
+    pid_send('  ')
+    time.sleep(0.1)
+
 if len(sys.argv) == 4:
     pid = PID.for_device(sys.argv[3])
 
-pid_send('  ')
-time.sleep(0.3)
+send_blank()
+blank_counter = 0
 
 last_string = None
 while True:
     pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
+    if blank_counter == 20: # 20 * 0.5min = 10min
+        send_blank()
     if last_string != pids_string:
         pid_send(pids_string)
         last_string = pids_string
     else:
         print('Nothing to do, skipping')
+    blank_counter += 1
     time.sleep(30)
     pid_ping()

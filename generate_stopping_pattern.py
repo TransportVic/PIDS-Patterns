@@ -123,10 +123,16 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     destination = stopping_pattern[-1]
 
     if len(express_parts) == 0:
-        return {
-            "stopping_pattern": 'Stops All Stations',
-            "stopping_type": 'Stops All Stations'
-        }
+        if via_city_loop and not is_up and from_stop == 'Flinders Street':
+            return {
+                "stopping_pattern": 'Stops All Stations via City Loop',
+                "stopping_type": 'Stops All Stations'
+            }
+        else:
+            return {
+                "stopping_pattern": 'Stops All Stations',
+                "stopping_type": 'Stops All Stations'
+            }
     if len(express_parts) == 1 and len(express_parts[0]) == 1:
         return {
             "stopping_pattern": 'All Except {}'.format(express_parts[0][0]),
