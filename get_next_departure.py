@@ -149,10 +149,12 @@ if estimated_departure_utc:
 scheduled_departure = format_time(scheduled_departure_utc)
 pids_string = 'V20^{} {}~{}_{}|H10^_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type, stopping_pattern)
 
-if sys.argv[3]:
+if len(sys.argv) == 4:
     print('Attempting to send to PID on', sys.argv[3])
     pid = PID.for_device(sys.argv[3])
     pid.send(pids_string)
     while True:
         time.sleep(10)
         pids.ping()
+else:
+    print(pids_string)
