@@ -20,6 +20,7 @@ def date(iso):
     return datetime.datetime.strptime(iso, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=aus_mel)
 
 def format_time(time):
+    time = date(time)
     iso_time = str(time)
 
     hour = time.hour
@@ -118,22 +119,27 @@ def get_next_departure_for_platform(station_name, platform):
             "stopping_type": stopping_type
         }
 
-        # time_to_departure = None
-        # if estimated_departure_utc:
-        #     time_to_departure = time_diff(estimated_departure_utc)
-        #     if time_to_departure <= 0:
-        #         time_to_departure = 'NOW'
-        #     else:
-        #         time_to_departure = str(time_to_departure) + ' min'
-        #
-        # print('Next train:', train_descriptor)
-        # print(format_time(date(scheduled_departure_utc)), destination)
-        # if estimated_departure_utc:
-        #     print('Departing', time_to_departure)
-        # print(stopping_text)
     elif len(rrb_departures):
         raise Exception('No trains operating buses have been arranged')
     else:
         raise Exception('No trains depart platform {}'.format(platform))
 
-print(get_next_departure_for_platform(sys.argv[1], sys.argv[2]))
+next_departure = get_next_departure_for_platform(sys.argv[1], sys.argv[2])
+scheduled_departure_utc = next_departure['scheduled_departure_utc']
+estimated_departure_utc = next_departure['estimated_departure_utc']
+destination = next_departure['destination']
+stopping_pattern = next_departure['stopping_pattern']
+stopping_type = next_departure['stopping_type']
+
+time_to_departure = None
+if estimated_departure_utc:
+    time_to_departure = time_diff(estimated_departure_utc)
+    if time_to_departure <= 0:
+        time_to_departure = 'NOW'
+    else:
+        time_to_departure = str(time_to_departure)
+
+scheduled_departure = format_time(scheduled_departure_utc)
+pids_string = 'V20^{} {}~{}_{}|H10^_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type, stopping_pattern)
+
+print(pids_string)
