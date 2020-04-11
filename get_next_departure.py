@@ -131,30 +131,29 @@ def get_next_departure_for_platform(station_name, platform):
     else:
         raise Exception('No trains depart platform {}'.format(platform))
 
-next_departure = get_next_departure_for_platform(sys.argv[1], sys.argv[2])
-scheduled_departure_utc = next_departure['scheduled_departure_utc']
-estimated_departure_utc = next_departure['estimated_departure_utc']
-destination = next_departure['destination']
-stopping_pattern = next_departure['stopping_pattern']
-stopping_type = next_departure['stopping_type']
+def generate_pids_string(station_name, platform):
+    next_departure = get_next_departure_for_platform(station_name, platform)
+    scheduled_departure_utc = next_departure['scheduled_departure_utc']
+    estimated_departure_utc = next_departure['estimated_departure_utc']
+    destination = next_departure['destination']
+    stopping_pattern = next_departure['stopping_pattern']
+    stopping_type = next_departure['stopping_type']
 
-time_to_departure = None
-if estimated_departure_utc:
-    time_to_departure = time_diff(estimated_departure_utc)
-    if time_to_departure <= 0:
-        time_to_departure = 'NOW'
-    else:
-        time_to_departure = str(time_to_departure)
+    time_to_departure = None
+    if estimated_departure_utc:
+        time_to_departure = time_diff(estimated_departure_utc)
+        if time_to_departure <= 0:
+            time_to_departure = 'NOW'
+        else:
+            time_to_departure = str(time_to_departure)
 
-scheduled_departure = format_time(scheduled_departure_utc)
-pids_string = 'V20^{} {}~{}_{}|H10^_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type, stopping_pattern)
+    scheduled_departure = format_time(scheduled_departure_utc)
+    pids_string = 'V20^{} {}~{}_{}|H10^_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type, stopping_pattern)
+    return pids_string
 
-if len(sys.argv) == 4:
-    print('Attempting to send to PID on', sys.argv[3])
-    pid = PID.for_device(sys.argv[3])
+pid = PID.for_device(sys.argv[3])
+while True:
+    pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
     pid.send(pids_string)
-    while True:
-        time.sleep(10)
-        pids.ping()
-else:
-    print(pids_string)
+    time.sleep(30)
+    pids.ping()
