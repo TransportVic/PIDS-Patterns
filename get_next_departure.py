@@ -170,32 +170,36 @@ def generate_pids_string(station_name, platform):
     if is_all_except:
         bottom_row = stopping_pattern
 
-    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
+    pids_string = 'N20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
     if stopping_type != 'Stops All Stations' and not is_all_except:
-        pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
+        pids_string += '|N1^{}_{}'.format(pids_string[4:], stopping_pattern)
+        # pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
     return pids_string
 
 def pid_send(pid, data):
     try:
         pid.send(data)
     except Exception as e:
+        print(e)
         pass
 
 def pid_ping(pid):
     try:
         pid.ping()
     except Exception as e:
+        print(e)
         pass
 
-pid = PID.for_device(sys.argv[3])
-last_string = None
-while True:
-    pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
-    if last_string != pids_string:
-        pid_send(pid, pids_string)
-        print(pids_string)
-        last_string = pids_string
-    else:
-        print('Nothing to do, skipping')
-    time.sleep(30)
-    pid_ping(pid)
+with PID.for_device(sys.argv[3]) as pid:
+# if True:
+    last_string = None
+    while True:
+        pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
+        if last_string != pids_string:
+            pid_send(pid, pids_string)
+            print(pids_string)
+            last_string = pids_string
+        else:
+            print('Nothing to do, skipping')
+        time.sleep(30)
+        pid_ping(pid)
