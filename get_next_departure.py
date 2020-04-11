@@ -178,4 +178,7 @@ while True:
     else:
         print('Nothing to do, skipping')
     time.sleep(30)
-    pid.ping()
+    try:
+        pid.ping()
+    except Exception as e:
+        pass
