@@ -92,7 +92,7 @@ def get_express_sections(stopping_pattern, relevant_stops):
     return express_parts
 
 def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
-    route_stops = get_route_stops(route_name)
+    route_stops = get_route_stops(route_name).copy()
 
     if is_up:
         route_stops.reverse()

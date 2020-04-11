@@ -127,12 +127,16 @@ def get_next_departure_for_platform(station_name, platform):
         }
 
     elif len(rrb_departures):
-        raise Exception('No trains operating buses have been arranged')
+        raise Exception('NO TRAINS OPERATING_REPLACEMENT BUSES|H1^_HAVE BEEN ARRANGED')
     else:
-        raise Exception('No trains depart platform {}'.format(platform))
+        raise Exception('NO TRAINS DEPART|FROM THIS PLATFORM')
 
 def generate_pids_string(station_name, platform):
-    next_departure = get_next_departure_for_platform(station_name, platform)
+    next_departure = None
+    try:
+        next_departure = get_next_departure_for_platform(station_name, platform)
+    except Exception as e:
+        return str(e)
     scheduled_departure_utc = next_departure['scheduled_departure_utc']
     estimated_departure_utc = next_departure['estimated_departure_utc']
     destination = next_departure['destination']
@@ -163,5 +167,7 @@ while True:
         except Exception as e:
             pass
         last_string = pids_string
+    else:
+        print('Nothing to do, skipping')
     time.sleep(30)
-    pids.ping()
+    pid.ping()
