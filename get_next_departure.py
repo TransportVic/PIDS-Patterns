@@ -173,7 +173,7 @@ def generate_pids_string(station_name, platform):
 
     pids_string = 'V20^{} {}{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
     if stopping_type != 'Stops All Stations' and not is_all_except:
-        pids_string += '|H1^_{}'.format(stopping_pattern)
+        pids_string += '|H0^_{}'.format(stopping_pattern)
     return pids_string
 
 pid = None
@@ -198,8 +198,8 @@ def pid_ping():
 if len(sys.argv) == 4:
     pid = PID.for_device(sys.argv[3])
 
-pid_send('12:34 FUNKYTOWN~5_Limited Express|_Stops all stations except East Richard')
-time.sleep(7)
+pid_send('  ')
+time.sleep(0.3)
 
 last_string = None
 while True:
