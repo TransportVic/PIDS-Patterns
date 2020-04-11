@@ -191,7 +191,7 @@ def pid_ping(pid):
         pass
 
 with PID.for_device(sys.argv[3]) as pid:
-if True:
+# if True:
     last_string = None
     while True:
         pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
