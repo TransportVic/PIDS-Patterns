@@ -70,9 +70,9 @@ def get_stopping_pattern(run_id, is_up):
 def transform(departure):
     if departure['route_id'] == 13:
         if departure['stop_id'] == 1073:
-            departure['platform_number'] = '1'
-        else:
             departure['platform_number'] = '3'
+        else:
+            departure['platform_number'] = '1'
 
     if 'RRB-RUN' in departure['flags']:
         departure['platform_number'] = 'RRB'
@@ -100,7 +100,8 @@ def get_next_departure_for_platform(station_name, platform):
     if len(platform_departures):
         next_departure = platform_departures[0]
         run_data = runs[str(next_departure['run_id'])]
-        train_descriptor = run_data['vehicle_descriptor']['id']
+        vehicle_descriptor = run_data['vehicle_descriptor'] or { 'id': None }
+        train_descriptor = vehicle_descriptor['id']
         route_name = routes[str(next_departure['route_id'])]['route_name']
 
         is_up = next_departure['direction_id'] == 1
@@ -147,13 +148,13 @@ def generate_pids_string(station_name, platform):
     stopping_pattern = next_departure['stopping_pattern']
     stopping_type = next_departure['stopping_type']
 
-    time_to_departure = None
+    time_to_departure = ''
     if estimated_departure_utc:
         time_to_departure = time_diff(estimated_departure_utc)
         if time_to_departure <= 0:
-            time_to_departure = 'NOW'
+            time_to_departure = 'NOW '
         else:
-            time_to_departure = str(time_to_departure)
+            time_to_departure = str(time_to_departure) + ' '
 
     destination = destination.upper()
     if destination == 'FLINDERS STREET':
@@ -170,10 +171,9 @@ def generate_pids_string(station_name, platform):
     if is_all_except:
         bottom_row = stopping_pattern
 
-    pids_string = 'N20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
+    pids_string = 'V20^{} {}{}{}_{}'.format(scheduled_departure, destination, '~' if time_to_departure else '', time_to_departure, bottom_row)
     if stopping_type != 'Stops All Stations' and not is_all_except:
-        pids_string += '|N1^{}_{}'.format(pids_string[4:], stopping_pattern)
-        # pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
+        pids_string += '|H1^_{}'.format(stopping_pattern)
     return pids_string
 
 def pid_send(pid, data):
@@ -190,16 +190,16 @@ def pid_ping(pid):
         print(e)
         pass
 
-with PID.for_device(sys.argv[3]) as pid:
-# if True:
+# with PID.for_device(sys.argv[3]) as pid:
+if True:
     last_string = None
     while True:
         pids_string = generate_pids_string(sys.argv[1], sys.argv[2])
         if last_string != pids_string:
-            pid_send(pid, pids_string)
+            # pid_send(pid, pids_string)
             print(pids_string)
             last_string = pids_string
         else:
             print('Nothing to do, skipping')
         time.sleep(30)
-        pid_ping(pid)
+        # pid_ping(pid)
