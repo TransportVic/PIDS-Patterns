@@ -163,10 +163,16 @@ def generate_pids_string(station_name, platform):
     if destination == 'UPPER FERNTREE GULLY':
         destination = 'UPPER F.T.G'
 
+    is_all_except = 'All Except' in stopping_pattern
+
     scheduled_departure = format_time(scheduled_departure_utc)
-    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, stopping_type)
-    if stopping_type != 'Stops All Stations':
-        pids_string += '|H1^_{}'.format(stopping_pattern)
+    bottom_row = stopping_type
+    if is_all_except:
+        bottom_row = stopping_pattern
+
+    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
+    if stopping_type != 'Stops All Stations' and not is_all_except:
+        pids_string += '|H1^{}_{}'.format(pids_string[4:], stopping_pattern)
     return pids_string
 
 def pid_send(pid, data):
