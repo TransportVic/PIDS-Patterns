@@ -97,7 +97,7 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     if is_up:
         route_stops.reverse()
 
-    via_city_loop = 'Parliament' in stopping_pattern
+    via_city_loop = 'Parliament' in stopping_pattern or 'Flagstaff' in stopping_pattern
     if via_city_loop:
         city_loop_stops = list(filter(lambda stop: stop in city_loop_stations, stopping_pattern))
         route_stops = list(filter(lambda stop: stop not in city_loop_stations, route_stops))
@@ -117,7 +117,8 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     start_index = stopping_pattern.index(from_stop)
     stopping_pattern = stopping_pattern[start_index:]
 
-    via_city_loop = 'Parliament' in stopping_pattern
+    via_city_loop = 'Parliament' in stopping_pattern or 'Flagstaff' in stopping_pattern
+    via_fss = not is_up and 'Flinders Street' in stopping_pattern and from_stop != 'Flinders Street'
 
     relevant_stops = route_stops[route_stops.index(stopping_pattern[0]):route_stops.index(stopping_pattern[-1]) + 1]
     express_parts = get_express_sections(stopping_pattern, relevant_stops)
@@ -125,21 +126,22 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     destination = stopping_pattern[-1]
 
     if len(express_parts) == 0:
+        stopping_pattern = 'Stops All Stations'
         if via_city_loop and from_stop == 'Flinders Street':
-            return {
-                "stopping_pattern": 'Stops All Stations via City Loop',
-                "stopping_type": 'Stops All Stations'
-            }
-        else:
-            return {
-                "stopping_pattern": 'Stops All Stations',
-                "stopping_type": 'Stops All Stations'
-            }
+            stopping_pattern += ' via City Loop'
+        elif via_fss:
+            stopping_pattern += ' via Flinders Street'
+        return {
+            "stopping_pattern": stopping_pattern,
+            "stopping_type": 'Stops All Stations'
+        }
     if len(express_parts) == 1 and len(express_parts[0]) == 1:
         stopping_pattern = 'Stops All Stations Except {}'.format(express_parts[0][0])
         stopping_type = 'All Except {}'.format(express_parts[0][0])
         if via_city_loop and from_stop == 'Flinders Street':
             stopping_pattern += ' via City Loop'
+        elif via_fss:
+            stopping_pattern += ' via Flinders Street'
         else:
             stopping_pattern = stopping_type
         return {
@@ -183,7 +185,9 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
 
     joined = ', '.join(texts)
     if via_city_loop and from_stop == 'Flinders Street':
-        joined += ' via the City Loop'
+        joined += ' via City Loop'
+    elif via_fss:
+        joined += ' via Flinders Street'
 
     stoppingType = ''
 
