@@ -6,8 +6,7 @@ import sys
 import json
 from generate_stopping_pattern import generate_stopping_pattern
 import os
-
-from metlinkpid import PID
+from metlinkpid import DisplayMessage, PID
 
 __dirname = os.path.dirname(os.path.realpath(__file__))
 config = json.load(open(__dirname + '/config.json', 'r'))
@@ -24,6 +23,51 @@ city_loop_stations = [
 'Flagstaff',
 'Melbourne Central'
 ]
+
+_DISPLAY_WIDTH = 120
+_CHARS_BY_WIDTH = {
+    3: b'.',
+    4: b'I1: ',
+    5: b'0-',
+    6: b'ABCDEFGHJKLMNOPQRSTUVWXYZ23456789',
+}
+_WIDTHS_BY_CHAR = {}
+for width, chars in _CHARS_BY_WIDTH.items():
+    for char in chars:
+        _WIDTHS_BY_CHAR[char] = width
+
+def pixel_width(string):
+    width = 0
+    for char in string:
+        if char not in _WIDTHS_BY_CHAR:
+            raise ValueError('unknown width for character "%s"' % char)
+        width += _WIDTHS_BY_CHAR[char]
+    return width
+
+def fix_right_justification(bytestring):
+    if rb'\R' not in bytestring:
+        return bytestring
+    left_start = 7
+    left_end = bytestring.index(rb'\R', left_start)
+    right_start = left_end + len(rb'\R')
+    right_end = bytestring.index(
+        b'\n', right_start
+    ) if b'\n' in bytestring[right_start:] else bytestring.index(
+        b'\r', right_start)
+    left = bytestring[left_start:left_end]
+    right = bytestring[right_start:right_end]
+    left_width = pixel_width(left)
+    right_width = pixel_width(right)
+    padding_width = _DISPLAY_WIDTH - 2 - left_width - right_width
+    padding = b''
+    space_width = _WIDTHS_BY_CHAR[ord(' ')]
+    while padding_width >= space_width:
+        padding += b' '
+        padding_width -= space_width
+    while padding_width > 0:
+        padding += b'\xff'
+        padding_width -= 1
+    return bytestring[:left_end] + padding + bytestring[right_start:]
 
 def date(iso):
     return datetime.datetime.strptime(iso, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=aus_mel)
@@ -193,7 +237,8 @@ def pid_send(data):
     try:
         print(data)
         if pid != None:
-            pid.send(data)
+            msg = DisplayMessage.from_str(data).to_bytes()
+            pid.send(fix_right_justification(msg))
     except Exception as e:
         print(e)
         pass
