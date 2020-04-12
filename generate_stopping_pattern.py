@@ -97,7 +97,7 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     if is_up:
         route_stops.reverse()
 
-    via_city_loop = 'Flagstaff' in stopping_pattern
+    via_city_loop = 'Parliament' in stopping_pattern
     if via_city_loop:
         city_loop_stops = list(filter(lambda stop: stop in city_loop_stations, stopping_pattern))
         route_stops = list(filter(lambda stop: stop not in city_loop_stations, route_stops))
@@ -117,7 +117,7 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     start_index = stopping_pattern.index(from_stop)
     stopping_pattern = stopping_pattern[start_index:]
 
-    via_city_loop = 'Flagstaff' in stopping_pattern
+    via_city_loop = 'Parliament' in stopping_pattern
 
     relevant_stops = route_stops[route_stops.index(stopping_pattern[0]):route_stops.index(stopping_pattern[-1]) + 1]
     express_parts = get_express_sections(stopping_pattern, relevant_stops)

@@ -48,7 +48,7 @@ def time_diff(iso):
 
     return int(millisecond_diff // 60)
 
-def get_stopping_pattern(run_id, is_up):
+def get_stopping_pattern(run_id, is_up, from_stop):
     url = '/v3/pattern/run/{}/route_type/0?expand=stop'.format(run_id)
     pattern_payload = ptv_api(url, dev_id, key)
     departures = pattern_payload['departures']
@@ -62,11 +62,14 @@ def get_stopping_pattern(run_id, is_up):
 
     if 'Flinders Street' in stopping_pattern:
         if is_up:
-            fssIndex = stopping_pattern.index('Flinders Street')
-            stopping_pattern = stopping_pattern[0:fssIndex + 1]
+            fss_index = stopping_pattern.index('Flinders Street')
+            stopping_pattern = stopping_pattern[0:fss_index + 1]
         else:
-            fssIndex = stopping_pattern.index('Flinders Street')
-            stopping_pattern = stopping_pattern[fssIndex:]
+            fss_index = stopping_pattern.index('Flinders Street')
+            stop_index = stopping_pattern.index(from_stop)
+            if fss_index < stop_index:
+                stop_index = fss_index
+            stopping_pattern = stopping_pattern[stop_index:]
 
     return stopping_pattern
 
@@ -111,7 +114,7 @@ def get_next_departure_for_platform(station_name, platform):
         if next_departure['route_id'] == '13':
             is_up = next_departure['direction_id'] == 5
 
-        stopping_pattern = get_stopping_pattern(next_departure['run_id'], is_up)
+        stopping_pattern = get_stopping_pattern(next_departure['run_id'], is_up, station_name)
 
         stopping_pattern_info = generate_stopping_pattern(route_name, stopping_pattern, is_up, station_name)
         stopping_text = stopping_pattern_info['stopping_pattern']
