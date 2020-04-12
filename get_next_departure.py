@@ -16,9 +16,14 @@ stations = json.load(open(__dirname + '/stations.json', 'r'))
 key = config['key']
 dev_id = config['dev_id']
 
-
 aus_mel = gettz('Australia/Melbourne')
-utc = gettz('Australia/Melbourne')
+
+city_loop_stations = [
+'Southern Cross',
+'Parliament',
+'Flagstaff',
+'Melbourne Central'
+]
 
 def date(iso):
     return datetime.datetime.strptime(iso, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=aus_mel)
@@ -125,7 +130,7 @@ def get_next_departure_for_platform(station_name, platform):
 
         destination = stopping_pattern[-1]
 
-        if is_up and 'Flagstaff' in stopping_pattern:
+        if is_up and 'Parliament' in stopping_pattern and station_name not in city_loop_stations:
             destination = 'City Loop'
 
         return {
