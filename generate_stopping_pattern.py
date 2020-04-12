@@ -137,11 +137,14 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
             }
     if len(express_parts) == 1 and len(express_parts[0]) == 1:
         stopping_pattern = 'Stops All Stations Except {}'.format(express_parts[0][0])
+        stopping_type = 'All Except {}'.format(express_parts[0][0])
         if via_city_loop and from_stop == 'Flinders Street':
             stopping_pattern += ' via City Loop'
+        else:
+            stopping_pattern = stopping_type
         return {
             "stopping_pattern": stopping_pattern,
-            "stopping_type": 'All Except {}'.format(express_parts[0][0])
+            "stopping_type": stopping_type
         }
 
     last_stop = None
