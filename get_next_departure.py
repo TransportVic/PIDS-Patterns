@@ -60,10 +60,13 @@ def get_stopping_pattern(run_id, is_up):
     if 'Jolimont-MCG' in stopping_pattern:
         stopping_pattern[stopping_pattern.index('Jolimont-MCG')] = 'Jolimont'
 
-    if is_up:
-        if 'Flinders Street' in stopping_pattern:
+    if 'Flinders Street' in stopping_pattern:
+        if is_up:
             fssIndex = stopping_pattern.index('Flinders Street')
             stopping_pattern = stopping_pattern[0:fssIndex + 1]
+        else:
+            fssIndex = stopping_pattern.index('Flinders Street')
+            stopping_pattern = stopping_pattern[fssIndex:]
 
     return stopping_pattern
 
@@ -148,13 +151,13 @@ def generate_pids_string(station_name, platform):
     stopping_pattern = next_departure['stopping_pattern']
     stopping_type = next_departure['stopping_type']
 
-    time_to_departure = ''
-    if estimated_departure_utc:
-        time_to_departure = time_diff(estimated_departure_utc)
-        if time_to_departure <= 0:
-            time_to_departure = '~NOW'
-        else:
-            time_to_departure = '~' + str(time_to_departure)
+    actual_departure_utc = estimated_departure_utc or scheduled_departure_utc
+
+    time_to_departure = time_diff(actual_departure_utc)
+    if time_to_departure <= 0:
+        time_to_departure = 'NOW'
+    else:
+        time_to_departure = str(time_to_departure)
 
     destination = destination.upper()
     if destination == 'FLINDERS STREET':
@@ -171,7 +174,7 @@ def generate_pids_string(station_name, platform):
     if is_all_except:
         bottom_row = stopping_pattern
 
-    pids_string = 'V20^{} {}{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
+    pids_string = 'V20^{} {}~{}_{}'.format(scheduled_departure, destination, time_to_departure, bottom_row)
     if stopping_pattern != 'Stops All Stations' and not is_all_except:
         pids_string += '|H0^_{}'.format(stopping_pattern)
     return pids_string

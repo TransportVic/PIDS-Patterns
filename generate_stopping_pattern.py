@@ -117,13 +117,15 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
     start_index = stopping_pattern.index(from_stop)
     stopping_pattern = stopping_pattern[start_index:]
 
+    via_city_loop = 'Flagstaff' in stopping_pattern
+
     relevant_stops = route_stops[route_stops.index(stopping_pattern[0]):route_stops.index(stopping_pattern[-1]) + 1]
     express_parts = get_express_sections(stopping_pattern, relevant_stops)
 
     destination = stopping_pattern[-1]
 
     if len(express_parts) == 0:
-        if via_city_loop and not is_up and from_stop == 'Flinders Street':
+        if via_city_loop and from_stop == 'Flinders Street':
             return {
                 "stopping_pattern": 'Stops All Stations via City Loop',
                 "stopping_type": 'Stops All Stations'
@@ -134,9 +136,12 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
                 "stopping_type": 'Stops All Stations'
             }
     if len(express_parts) == 1 and len(express_parts[0]) == 1:
+        stopping_pattern = 'Stops All Stations Except {}'.format(express_parts[0][0])
+        if via_city_loop and from_stop == 'Flinders Street':
+            stopping_pattern += ' via City Loop'
         return {
-            "stopping_pattern": 'All Except {}'.format(express_parts[0][0]),
-            "stopping_type": 'Limited Express'
+            "stopping_pattern": stopping_pattern,
+            "stopping_type": 'All Except {}'.format(express_parts[0][0])
         }
 
     last_stop = None
@@ -174,7 +179,7 @@ def generate_stopping_pattern(route_name, stopping_pattern, is_up, from_stop):
         texts.append('then Stops All Stations to {}'.format(destination))
 
     joined = ', '.join(texts)
-    if via_city_loop and not is_up and from_stop == 'Flinders Street':
+    if via_city_loop and from_stop == 'Flinders Street':
         joined += ' via the City Loop'
 
     stoppingType = ''
